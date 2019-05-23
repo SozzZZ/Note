@@ -1072,7 +1072,7 @@ session操作:
 原理
 - 前端
   浏览器通过cookie将token带到前端服务器 , 前端服务器将token取出 , 再将其加到请求header的Authoriation中访问后端服务器
-  ![token](./image/token.png)
+  ![token](../image/token.png)
 - 后端
   通过Token表来储存token和user_id的关系
   - 登陆逻辑
@@ -1117,7 +1117,7 @@ session操作:
 原理
  - 前端
   前端逻辑和token一样 , 在不过传输格式上有些区别
-  ![jwt](./image/jwt.png)
+  ![jwt](../image/jwt.png)
   JWT 和token字符串用空格隔开
 - 后端
   - 在后续的访问中 , django会从请求header的Authoriation去取token , 然后在将token解密成payload , 从payload读取user相关的信息 , 再去用户表中找到user
