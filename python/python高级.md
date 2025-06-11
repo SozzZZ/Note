@@ -694,59 +694,67 @@ if __name__ == "__main__":
     - connect(address)  和指定地址建立连接
   
   ```py
-  #使用UDP创建简单的聊天室模型
-  #服务器端
-  import socket
-  from threading import Thread
-
-  def recv_mes(soc):
-          '''服务器接收消息'''
-          while 1:
-                  data,addr = soc.recvfrom(1204)
-                  data = data.decode('utf-8')
-                  if data.startswith('username@'):
-                          user_name[addr] = data.lstrip('username@')
-                          mes = '欢迎'+user_name[addr] +'加入聊天室'
-                          soc.sendto(mes.encode('utf-8'),('192.168.18.255', 8888))
-                  mes = user_name[addr] + ':' + data
-                  soc.sendto(mes.encode('utf-8'),('192.168.18.255', 8888))
-
-  if __name__ == "__main__":
-          soc = socket.socket(family=socket.AF_INET , type=socket.SOCK_DGRAM )
-          soc.bind(('',6666))
-          user_name = {}
-          recv_mes(soc)
+	#使用UDP创建简单的聊天室模型
+	#服务器端
+	import socket
+	from threading import Thread
+	import json
+	
+	Users = {}
+	Addrs = []
+	def recv_mes(soc):
+	    while True:
+	        data,addr = soc.recvfrom(1204)
+	        data = data.decode("utf-8")
+	        if data.startswith("username@"):
+	            Users[addr] = data.lstrip('username@')
+	            Addrs.append(addr)
+	            mes = f"欢迎{Users[addr]}加入聊天室"
+	        else:    
+	            mes = Users[addr] + ':' + data
+	            
+	        for ads in Addrs:
+	             soc.sendto(mes.encode('utf-8'),ads)
+	
+	if __name__ == "__main__":
+	    soc = socket.socket(family=socket.AF_INET , type=socket.SOCK_DGRAM )
+	    soc.bind(('',6666))
+	    recv_mes(soc)
   #客户端
-  import socket
-  from threading import Thread
+	import socket
+	from threading import Thread
 
-  def recv_mes():
-          '''客户端接收消息'''
-          while 1:
-                  data,addr = soc.recvfrom(1204)
-                  if addr == sever_address:
-                          print(data.decode('utf-8'))
-
-  def send_mes():
-          '''客户端消息'''
-          while 1:
-                  data = input('')
-                  soc.sendto(data.encode('utf-8'),sever_address)
-
-  if __name__ == "__main__":
-          soc = socket.socket(family=socket.AF_INET , type=socket.SOCK_DGRAM )
-          soc.bind(('',8888))
-          user_name = {}
-          sever_address = ('192.168.18.46',6666)
-          #向服务器发送用户名
-          username = 'username@' + input('请输入用户名:')
-          soc.sendto(username.encode('utf-8'),sever_address)
-          #启动双线程,进行收发消息
-          recv_thread = Thread(target=recv_mes)
-          send_thread = Thread(target=send_mes)
-          recv_thread.start()
-          send_thread.start()
-          recv_thread.join()
+	sever_address = ('192.168.0.101',6666)
+	
+	
+	def recv_mes():
+	    '''客户端接收消息'''
+	    while 1:
+	        data,addr = soc.recvfrom(1204)
+	        if addr == sever_address:
+	            print(data.decode('utf-8'))
+	
+	def send_mes():
+	    '''客户端消息'''
+	    while 1:
+	        data = input('')
+	        soc.sendto(data.encode('utf-8'),sever_address)
+	
+	if __name__ == "__main__":
+	    soc = socket.socket(family=socket.AF_INET , type=socket.SOCK_DGRAM )
+	    port = input('请输入端口:')
+	    soc.bind(('',int(port)))
+	    user_name = {}
+	    #向服务器发送用户名
+	    username = 'username@' + input('请输入用户名:')
+	    print(1)
+	    soc.sendto(username.encode('utf-8'),sever_address)
+	    #启动双线程,进行收发消息
+	    recv_thread = Thread(target=recv_mes)
+	    send_thread = Thread(target=send_mes)
+	    recv_thread.start()
+	    send_thread.start()
+	    recv_thread.join()
   ```
 
 - TCP编程
