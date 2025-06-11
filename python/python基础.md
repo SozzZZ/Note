@@ -845,6 +845,9 @@ Person.drink() #喝酒咯~~
     ```
   
 ## 设计模式
+
+### 创建型模式
+主要解决对象创建的问题
 - 单例模式
   ```py
   class Only():
@@ -864,7 +867,7 @@ Person.drink() #喝酒咯~~
     通过一个函数 , 根据传入参数的不同 , 返回不同的对象
     ```py
     class Sneakers():
-    pass
+        pass
 
     class RunningShoes():
         pass
@@ -883,6 +886,182 @@ Person.drink() #喝酒咯~~
     ```
   - 抽象工厂
     通过一个抽象类 , 将生成对象的方法整合到类中 , 再通过继承和多态 , 继承这个抽象类 , 传入生成不同对象的类
-  ```py
+    ```py
+    class Shoes():
+        pass
 
+    class Sneakers(Shoes):
+        pass
+
+    class RunningShoes(Shoes):
+        pass
+
+    class SkateboardShoes(Shoes):
+        pass
+    
+    class AbstractFactory:
+        def makeShoes(self):
+            pass
+    
+    class MakeSneakers(AbstractFactory):
+        def makeShoes(self):
+            return Sneakers()
+    
+    class MakeRunningShoes(AbstractFactory):
+        def makeShoes(self):
+            return RunningShoes()
+    
+    class MakeSkateboardShoes(AbstractFactory):
+        def makeShoes(self):
+            return SkateboardShoes()
+
+    sneakersFactory = MakeSneakers()
+    runningShoesFactory = MakeRunningShoes()
+
+    sneaker = sneakersFactory.makeShoes()
+    runningShoes =runningShoesFactory.makeShoes()
+    ```
+
+### 结构型模式
+主要解决如何组织组合类与对象
+- 适配器模式
+  将一个类的接口转换成客户端希望的其他接口，解决接口不兼容的问题
+  ```py
+    class ChinaCar:
+        def handDrive(self):
+            return "right"
+
+    class HongKongCar:
+        def handDrive(self):
+            return "left"
+
+    class Adapter(HongKongCar):
+        def __init__(self, car):
+            super().__init__()
+            self.car = car
+        
+        def handDrive(self):
+            return self.car.handDrive()
+
+    xiaomi = ChinaCar()
+    bmw = HongKongCar()
+    print(xiaomi.handDrive(), bmw.handDrive()) #right left
+
+    bmw = Adapter(xiaomi)
+    print(xiaomi.handDrive(), bmw.handDrive())#right right
   ```
+- 装饰器模式
+  动态的给对象添加额外的属性或者功能，不改变对象原来的代码
+
+### 行为型模式
+主要解决对象之间的交互
+- 策略模式
+    定义并封装一系列算法，使用时可以动态切换
+    ```py
+    class SortStrategy:
+    def sort(self, arr):
+        pass
+
+    class BubbleSort(SortStrategy):
+        def sort(self, arr):
+            n =len(arr)
+            for i in range(n):
+                for j in range(0, n-i-1):
+                    if arr[j]>arr[j+1]:
+                        arr[j],arr[j+1] = arr[j+1],arr[j]
+            return arr
+
+    class SelectSort(SortStrategy):
+        def sort(self, arr):
+            n =len(arr)
+            for i in range(n):
+                min_index = i
+                for j in range(i+1,n):
+                    if arr[j] < arr[min_index]:
+                        min_index = j
+                arr[i], arr[min_index] = arr[min_index],arr[i]
+            return arr
+
+    class InsertSort(SortStrategy):
+        def sort(self, arr):
+            for i in range(1,len(arr)):
+                key = arr[i]
+                j = i -1
+                while j>=0 and key < arr[j]:
+                    arr[j+1] = arr[j]
+                    j -= 1
+                arr[j+1] = key
+            return arr
+        
+    class Sort:
+        def __init__(self,strategy:SortStrategy):
+            self.__strategy = strategy
+
+        def setStrategy(self,strategy):
+            self.__strategy = strategy
+        
+        def sort(self,arr):
+            return self.__strategy.sort(arr)
+            
+
+    sorrt =  Sort(InsertSort())
+
+    arr = [50,4,3,86,45,12,36,144,23,98,2,9,6]
+    arr = sorrt.sort(arr)
+    ```
+- 观察者模式
+    当一个被观察对象发生变化时，所有观察者都会收到通知.
+    ```py
+    class Pulisher:
+    def __init__(self):
+        self.observers = []
+        self.news = None
+
+    def attach(self, observer):
+        if observer not in  self.observers:
+            self.observers.append(observer)
+    
+    def detach(self, observer):
+        self.observers.remove(observer)
+    
+    def notify(self,news):
+        for observer in self.observers:
+            observer.notify(news)
+    
+    def addNews(self, news):
+        self.news = news
+        self.notify(news)
+
+    class Obeserver:
+        def __init__(self):
+            pass
+
+        def notify(self):
+            pass
+
+    class MobileObserver(Obeserver):
+        def __init__(self,phone):
+            super().__init__()
+            self.phone = phone
+        
+        def notify(self, news):
+            print(f"send message to {self.phone}: {news}")
+
+    class EmailObserver(Obeserver):
+        def __init__(self,email):
+            super().__init__()
+            self.email = email
+        
+        def notify(self,news):
+            print(f"send email to {self.email}: {news}")
+
+    publisher = Pulisher()
+
+    bob = MobileObserver("178xxxxxx")
+    chenchong = EmailObserver("105xxx@qq.com")
+
+
+    publisher.attach(bob)
+    publisher.attach(chenchong)
+    publisher.addNews("aaaaa")
+    ```
